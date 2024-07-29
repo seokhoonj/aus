@@ -1,0 +1,28 @@
+Package: aus
+Title: Auto Underwriting System
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Seokhoon", family = "Joo", role = c("aut", "cre"),
+           email = "seokhoonj@gmail.com")
+Description: AUS development and validation.
+License: AGPL (>= 3)
+Encoding: UTF-8
+Depends: R (>= 3.5.0)
+Remotes:
+  github::seokhoonj/ggshort,
+  github::seokhoonj/jaid
+Imports:
+  data.table (>= 1.14.2),
+  ggplot2 (>= 3.3.3),
+  ggshort,
+  gridExtra(>= 2.3),
+  jaid,
+  rlang (>= 1.1.1),
+  scales (>= 1.2.1),
+  stringr (>= 1.5.1),
+  vtree (>= 5.6.5)
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
