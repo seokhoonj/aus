@@ -1,17 +1,17 @@
 
 #' @export
-replace_a_with_b <- function(df, cols, a = "미입력", b = "any") {
-  class <- sapply(df, class)
-  if (missing(cols))
-    cols <- names(class)[which(class == "character")]
-  df[, `:=`((cols), lapply(.SD, function(x) ifelse(x == a, b, x))), .SDcols = cols]
-  invisible(df[])
+check_rule_names <- function(rule) {
+  rule_var <- local(.RULE_VAR, envir = .AUS_ENV)
+  diff_var <- setdiff(rule_var, names(rule))
+  if (length(diff_var) > 0)
+    stop("No columns: ", paste(diff_var, collapse = ", "), ".", call. = FALSE)
 }
 
 #' @export
-split_band <- function(df, var, split = "~", any = "0~99999", etc = "0~99999") {
+split_rule_band <- function(df, var, split = "~", any = "0~99999", etc = "0~99999") {
   jaid::assert_class(df, "data.frame")
   var <- rlang::as_name(rlang::enquo(var))
+  jaid::has_cols(df, var, error_raise = TRUE)
   var_min <- paste0(var, "_min")
   var_max <- paste0(var, "_max")
   re <- sprintf("^[0-9]+$|^[0-9]+%s[0-9]+$|^%s[0-9]+$|^[0-9]+%s$",
@@ -31,6 +31,13 @@ split_band <- function(df, var, split = "~", any = "0~99999", etc = "0~99999") {
   data.table::set(df, i = i_etc, j = var_min, value = etc_min)
   data.table::set(df, i = i_etc, j = var_max, value = etc_max)
   data.table::setcolorder(df, c(var_min, var_max), after = var)
+  cols <- c(var_min, var_max)
+  df[, (cols) := lapply(.SD, as.numeric), .SDcols = cols]
   return(df)
 }
 
+get_new_term <- function(fterm, vterm) {
+  cmp <- as.numeric(fterm) >= as.numeric(gsub("i", "", vterm))
+  ifelse(cmp != TRUE | is.na(cmp), jaid::paste_list(list(fterm, vterm), sep = ","),
+         ifelse(cmp == TRUE, fterm, ""))
+}
