@@ -35,9 +35,3 @@ split_rule_band <- function(df, var, split = "~", any = "0~99999", etc = "0~9999
   df[, (cols) := lapply(.SD, as.numeric), .SDcols = cols]
   return(df)
 }
-
-get_new_term <- function(fterm, vterm) {
-  cmp <- as.numeric(fterm) >= as.numeric(gsub("i", "", vterm))
-  ifelse(cmp != TRUE | is.na(cmp), jaid::paste_list(list(fterm, vterm), sep = ","),
-         ifelse(cmp == TRUE, fterm, ""))
-}
