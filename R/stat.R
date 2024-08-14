@@ -1,21 +1,20 @@
 
 #' @export
-get_no_rule_stat <- function(applied) {
+get_stat_no_rule <- function(applied) {
   stat_nr <- applied[grepl("NR", life_diz), .(n = data.table::uniqueN(id)), .(diz_cd)]
   data.table::setorder(stat_nr, -n, diz_cd)
   stat_nr[, prop := n / sum(n)]
-  stat_nr <- stat_nr[1:20]
   stat_nr[, diz_cd := factor(diz_cd, levels = unique(diz_cd))]
   jaid::set_stat_by(stat_nr, value_var = prop)
   return(stat_nr[])
 }
 
 #' @export
-plot_no_rule_stat <- function(applied) {
+plot_stat_no_rule <- function(applied, rank = 1:20) {
   stat_nr <- applied[grepl("NR", life_diz), .(n = data.table::uniqueN(id)), .(diz_cd)]
   data.table::setorder(stat_nr, -n, diz_cd)
   stat_nr[, prop := n / sum(n)]
-  stat_nr <- stat_nr[1:20]
+  stat_nr <- stat_nr[rank]
   stat_nr[, diz_cd := factor(diz_cd, levels = unique(diz_cd))]
   jaid::set_stat_by(stat_nr, value_var = prop)
   ggbar(stat_nr, x = diz_cd, y = prop, ymax = max(prop) * 1.1,
