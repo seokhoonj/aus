@@ -12,6 +12,7 @@ Remotes:
   github::seokhoonj/ggshort,
   github::seokhoonj/jaid
 Imports:
+  cli (>= 3.6.3),
   data.table (>= 1.14.2),
   ggplot2 (>= 3.3.3),
   ggshort,

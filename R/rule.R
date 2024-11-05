@@ -48,5 +48,5 @@ check_rule_band <- function(rule) {
     cli::cli_warn("Some ranges of diseases are not between 0 and 99999.")
     return(df)
   }
-  cli::cli_text("All ranges of diseases are between 0 and 99999.")
+  cli::cli_inform("All ranges of diseases are between 0 and 99999.")
 }
