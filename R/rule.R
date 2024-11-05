@@ -35,3 +35,18 @@ split_rule_band <- function(df, var, split = "~", any = "0~99999", etc = "0~9999
   df[, (cols) := lapply(.SD, as.numeric), .SDcols = cols]
   return(df)
 }
+
+#' @export
+check_rule_band <- function(rule) {
+  df <- rule[, .(
+    age_min = min(age_min), age_max = max(age_max),
+    elp_day_min = min(elp_day_min), elp_day_max = max(elp_day_max),
+    sur_cnt_min = min(sur_cnt_min), sur_cnt_max = max(sur_cnt_max),
+    hos_day_min = min(hos_day_min), hos_day_max = max(hos_day_max)
+    ), .(diz_cd)][age_min != 0 | age_max != 99999 | elp_day_min != 0 | elp_day_max != 99999 | sur_cnt_min != 0 | sur_cnt_max != 99999 | hos_day_min != 0 | hos_day_max != 99999]
+  if (nrow(df)) {
+    cli::cli_warn("Some ranges of diseases are not between 0 and 99999.")
+    return(df)
+  }
+  cli::cli_text("All ranges of diseases are between 0 and 99999.")
+}

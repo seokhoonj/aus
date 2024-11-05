@@ -23,7 +23,7 @@ apply_rule <- function(diz_book, rule, icis, limit = 1e7) {
   cond_var  <- local(.COND_VAR , envir = .AUS_ENV)
   decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
   jaid::timeit(icis <- rule[icis, on = .(diz_cd), allow.cartesian = TRUE])
-  icis <- icis[, .SD, .SDcols = c("id", "gender", "age", "age_band", "rule_yn", "diz_cd", "kcd", "kcd_seq", "main_yn", "sub_chk", "inq_date", "clm_date", "hos_day", "hos_cnt", "sur_cnt", "elp_day", cond_var, decis_var)]
+  icis <- icis[, .SD, .SDcols = c("id", "gender", "age", "rule_yn", "diz_cd", "kcd", "kcd_seq", "main_yn", "sub_chk", "hos_day", "hos_cnt", "sur_cnt", "elp_day", cond_var, decis_var)]
   icis[ is.na(kcd) & is.na(diz_cd), (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "S0", x)), .SDcols = decis_var]
   icis[!is.na(kcd) & is.na(diz_cd), (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = decis_var]
   icis[rule_yn == 0, (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = decis_var]

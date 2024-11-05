@@ -13,5 +13,7 @@
 *.pptx
 *.doc
 *.docx
-tests/
+dev/
 doc/
+save/
+tests/

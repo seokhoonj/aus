@@ -3,6 +3,8 @@
 export(apply_rule)
 export(change_final_decis)
 export(change_stat_decis)
+export(check_icis_names)
+export(check_rule_band)
 export(check_rule_names)
 export(get_final_from_applied)
 export(get_mod_decis)
