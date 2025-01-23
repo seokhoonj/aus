@@ -18,6 +18,7 @@ Imports:
   ggshort,
   gridExtra(>= 2.3),
   jaid,
+  reticulate (>= 1.40.0),
   rlang (>= 1.1.1),
   scales (>= 1.2.1),
   stringr (>= 1.5.1),
