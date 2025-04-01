@@ -1,6 +1,6 @@
 
 #' @export
-apply_rule <- function(diz_book, rule, icis, limit = 1e7) {
+apply_rule <- function(diz_book, rule, icis, decis_var, limit = 1e7) {
   # expect cartesian rows
   n <- expect_cartesian_rows(diz_book, rule, icis)
   if (n > limit)
@@ -21,7 +21,9 @@ apply_rule <- function(diz_book, rule, icis, limit = 1e7) {
   # icis x rule (cartesian)
   decl_var  <- local(.DECL_VAR , envir = .AUS_ENV)
   cond_var  <- local(.COND_VAR , envir = .AUS_ENV)
-  decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
+  if (missing(decis_var))
+    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
+
   jaid::timeit(icis <- rule[icis, on = .(diz_cd), allow.cartesian = TRUE])
   icis <- icis[, .SD, .SDcols = c("id", "gender", "age", "rule_yn", "diz_cd", "kcd", "kcd_seq", "main_yn", "sub_chk", "hos_day", "hos_cnt", "sur_cnt", "elp_day", cond_var, decis_var)]
   icis[ is.na(kcd) & is.na(diz_cd), (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "S0", x)), .SDcols = decis_var]
