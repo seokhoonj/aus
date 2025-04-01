@@ -27,31 +27,31 @@ plot_stat_no_rule <- function(applied, rank = 1:20) {
 }
 
 #' @export
-get_stat_from_final <- function(final, decis_var) {
+get_stat_from_final <- function(final, deci_var) {
   jaid::assert_class(final, "data.table")
-  if (missing(decis_var))
-    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
-  final[, (decis_var) := lapply(.SD, change_stat_decis), .SDcols = decis_var]
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
+  final[, (deci_var) := lapply(.SD, change_stat_deci), .SDcols = deci_var]
   n <- nrow(final)
-  dm <- data.table::melt(final, id.vars = "id", value.vars = decis_var,
-                         variable.name = "coverage", value.name = "decis")
-  ds <- dm[, .(n = .N), .(coverage, decis)]
+  dm <- data.table::melt(final, id.vars = "id", value.vars = deci_var,
+                         variable.name = "coverage", value.name = "deci")
+  ds <- dm[, .(n = .N), .(coverage, deci)]
   ds[, prop := n / sum(n), .(coverage)]
   return(ds[])
 }
 
 #' @export
-plot_stat_from_final <- function(final, decis_var) {
+plot_stat_from_final <- function(final, deci_var) {
   jaid::assert_class(final, "data.table")
-  if (missing(decis_var))
-    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
-  final[, (decis_var) := lapply(.SD, change_stat_decis), .SDcols = decis_var]
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
+  final[, (deci_var) := lapply(.SD, change_stat_deci), .SDcols = deci_var]
   n <- nrow(final)
-  dm <- data.table::melt(final, id.vars = "id", value.vars = decis_var,
-                         variable.name = "coverage", value.name = "decis")
-  ds <- dm[, .(n = .N), .(coverage, decis)]
+  dm <- data.table::melt(final, id.vars = "id", value.vars = deci_var,
+                         variable.name = "coverage", value.name = "deci")
+  ds <- dm[, .(n = .N), .(coverage, deci)]
   ds[, prop := n / sum(n), .(coverage)]
-  ggbar(ds, x = coverage, y = prop, ymax = max(prop) * 1.1, group = decis, fill = decis,
+  ggbar(ds, x = coverage, y = prop, ymax = max(prop) * 1.1, group = deci, fill = deci,
         label = sprintf("%.0f", prop * 100), label_size = 3, label_angle = 90,
         label_hjust = -.1) +
     scale_y_comma() +
@@ -62,17 +62,17 @@ plot_stat_from_final <- function(final, decis_var) {
 }
 
 #' @export
-plot_stat_from_final_temp <- function(final, decis_var) {
+plot_stat_from_final_temp <- function(final, deci_var) {
   jaid::assert_class(final, "data.table")
-  if (missing(decis_var))
-    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
-  final[, (decis_var) := lapply(.SD, change_stat_decis), .SDcols = decis_var]
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
+  final[, (deci_var) := lapply(.SD, change_stat_deci), .SDcols = deci_var]
   n <- nrow(final)
-  dm <- data.table::melt(final, id.vars = "id", value.vars = decis_var,
-                         variable.name = "coverage", value.name = "decis")
-  ds <- dm[, .(n = .N), .(coverage, decis)]
+  dm <- data.table::melt(final, id.vars = "id", value.vars = deci_var,
+                         variable.name = "coverage", value.name = "deci")
+  ds <- dm[, .(n = .N), .(coverage, deci)]
   ds[, prop := n / sum(n), .(coverage)]
-  ggbar(ds, x = coverage, y = prop, ymax = max(prop) * 1.1, group = decis, fill = decis) +
+  ggbar(ds, x = coverage, y = prop, ymax = max(prop) * 1.1, group = deci, fill = deci) +
     scale_y_comma() +
     labs(title = "Exact Measurement of Auto Underwriting System",
          subtitle = sprintf("- %s Unit Test", jaid::as_comma(n))) +

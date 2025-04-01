@@ -1,6 +1,6 @@
 
 #' @export
-apply_rule <- function(diz_book, rule, icis, decis_var, limit = 1e7) {
+apply_rule <- function(diz_book, rule, icis, deci_var, limit = 1e7) {
   # expect cartesian rows
   n <- expect_cartesian_rows(diz_book, rule, icis)
   if (n > limit)
@@ -21,14 +21,14 @@ apply_rule <- function(diz_book, rule, icis, decis_var, limit = 1e7) {
   # icis x rule (cartesian)
   decl_var  <- local(.DECL_VAR , envir = .AUS_ENV)
   cond_var  <- local(.COND_VAR , envir = .AUS_ENV)
-  if (missing(decis_var))
-    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
 
   jaid::timeit(icis <- rule[icis, on = .(diz_cd), allow.cartesian = TRUE])
-  icis <- icis[, .SD, .SDcols = c("id", "gender", "age", "rule_yn", "diz_cd", "kcd", "kcd_seq", "main_yn", "sub_chk", "hos_day", "hos_cnt", "sur_cnt", "elp_day", cond_var, decis_var)]
-  icis[ is.na(kcd) & is.na(diz_cd), (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "S0", x)), .SDcols = decis_var]
-  icis[!is.na(kcd) & is.na(diz_cd), (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = decis_var]
-  icis[rule_yn == 0, (decis_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = decis_var]
+  icis <- icis[, .SD, .SDcols = c("id", "gender", "age", "rule_yn", "diz_cd", "kcd", "kcd_seq", "main_yn", "sub_chk", "hos_day", "hos_cnt", "sur_cnt", "elp_day", cond_var, deci_var)]
+  icis[ is.na(kcd) & is.na(diz_cd), (deci_var) := lapply(.SD, function(x) ifelse(is.na(x), "S0", x)), .SDcols = deci_var]
+  icis[!is.na(kcd) & is.na(diz_cd), (deci_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = deci_var]
+  icis[rule_yn == 0, (deci_var) := lapply(.SD, function(x) ifelse(is.na(x), "NR", x)), .SDcols = deci_var]
   icis[rule_yn == 0 | (
     age     >=     age_min & age     <=     age_max &
     hos_day >= hos_day_min & hos_day <= hos_day_max &
@@ -44,9 +44,11 @@ get_new_term <- function(fterm, vterm) {
 }
 
 #' @export
-get_mod_decis <- function(df, id_var = c("id"), decis_var = c("life_diz", "life_acc", "dis_diz", "dis_acc", "brain", "heart", "cancer", "hos_diz", "sur_diz", "hos_acc", "sur_acc", "mr_diz", "mr_acc", "ltc1", "ltc2", "saving"), type = c(1, 2)) {
+get_mod_deci <- function(df, id_var = c("id"), deci_var, type = c(1, 2)) {
   jaid::assert_class(df, "data.table")
-  col <- decis_var[1L]
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
+  col <- deci_var[1L]
   ds <- jaid::split_str(df[[col]], split = ",")
   data.table::setattr(ds, "names", df[[id_var]])
   dt <- utils::stack(ds)
@@ -66,25 +68,25 @@ get_mod_decis <- function(df, id_var = c("id"), decis_var = c("life_diz", "life_
   db[, fun   := ifelse(jaid::count_pattern("\\,", nterm) > 0, "Max", "")]
   db[, term  := ifelse(nterm != "" & fun == "", sprintf("(%s)", nterm), nterm)]
   db[, term  := ifelse(nterm != "" & fun != "", sprintf("(%s[%s])", fun, nterm), term)]
-  db[, decis := paste0(code, term)]
-  data.table::setorderv(db, c(id_var, "decis"))
+  db[, deci := paste0(code, term)]
+  data.table::setorderv(db, c(id_var, "deci"))
   if (type[[1L]] == 1) {
-    db <- db[, .(decis = jaid::paste_sort_uni_str(decis, collapse = ",")), .(id)]
+    db <- db[, .(deci = jaid::paste_sort_uni_str(deci, collapse = ",")), .(id)]
   }
-  data.table::setnames(db, "decis", col)
+  data.table::setnames(db, "deci", col)
   return(db[])
 }
 
 #' @export
-get_final_from_applied <- function(applied, decis_var) {
+get_final_from_applied <- function(applied, deci_var) {
   jaid::assert_class(applied, "data.table")
-  if (missing(decis_var))
-    decis_var <- local(.DECIS_VAR, envir = .AUS_ENV)
+  if (missing(deci_var))
+    deci_var <- local(.DECI_VAR, envir = .AUS_ENV)
   final <- applied[, lapply(.SD, function(x) jaid::paste_sort_uni_str(x, collapse = ",")),
-                   .(id, gender, age), .SDcols = decis_var]
-  final_list <- lapply(decis_var, function(x) get_mod_decis(final, decis_var = x))
+                   .(id, gender, age), .SDcols = deci_var]
+  final_list <- lapply(deci_var, function(x) get_mod_deci(final, deci_var = x))
   final <- Reduce(function(...) merge(..., by = "id"), final_list)
-  final[, (decis_var) := lapply(.SD, change_final_decis), .SDcols = decis_var]
+  final[, (deci_var) := lapply(.SD, change_final_deci), .SDcols = deci_var]
   return(final)
 }
 
@@ -96,7 +98,7 @@ get_a0 <- function(x) {
   as.numeric(x)
 }
 
-#' change_final_decis <- function(x) {
+#' change_final_deci <- function(x) {
 #'   ifelse(
 #'     grepl("D0", x) | jaid::count_pattern("E0", x) >= 4, "D0", ifelse(
 #'       grepl("NR|U0", x), "U0", ifelse(
@@ -106,7 +108,7 @@ get_a0 <- function(x) {
 #' }
 
 #' @export
-change_final_decis <- function(x) {
+change_final_deci <- function(x) {
   ifelse(
     grepl("D0", x) | jaid::count_pattern("E0", x) > 4 | get_a0(x) > 300, "D0", ifelse(
       grepl("U0", x), "U0", ifelse(
@@ -117,7 +119,7 @@ change_final_decis <- function(x) {
   )
 }
 
-# change_stat_decis <- function(x) {
+# change_stat_deci <- function(x) {
 #   ifelse(
 #     grepl("D0", x) | jaid::count_pattern("E0", x) >= 4, "D0", ifelse(
 #       grepl("NR|U0", x), "U0", ifelse(
@@ -127,7 +129,7 @@ change_final_decis <- function(x) {
 # }
 
 #' @export
-change_stat_decis <- function(x) {
+change_stat_deci <- function(x) {
   ifelse(
     grepl("D0", x) | jaid::count_pattern("E0", x) > 4 | get_a0(x) > 300, "D0", ifelse(
       grepl("U0", x), "U0", ifelse(
